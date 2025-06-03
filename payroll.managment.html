@@ -1,0 +1,844 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Payroll Management System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link
+rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+/>
+<style>
+@media print {
+body * {
+visibility: hidden;
+}
+#printable, #printable * {
+visibility: visible;
+}
+#printable {
+position: absolute;
+left: 0;
+top: 0;
+width: 100%;
+}
+#printable .no-print {
+display: none !important;
+}
+}
+</style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50">
+<div class="bg-white rounded shadow-lg p-8 w-full max-w-md">
+<h2 class="text-2xl font-bold mb-6 text-center">Payroll Management</h2>
+<form id="loginForm" class="space-y-4">
+<div>
+<label for="loginUsername" class="block font-medium mb-1">Username</label>
+<input
+type="text"
+id="loginUsername"
+name="loginUsername"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+autocomplete="username"
+/>
+</div>
+<div>
+<label for="loginPassword" class="block font-medium mb-1">Password</label>
+<input
+type="password"
+id="loginPassword"
+name="loginPassword"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+autocomplete="current-password"
+/>
+</div>
+<button
+type="submit"
+class="w-full bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800 transition"
+>
+Login
+</button>
+</form>
+<p class="mt-4 text-center text-sm text-gray-600"></p>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden flex flex-col min-h-screen">
+<header class="bg-blue-700 text-white p-4 shadow-md">
+<div class="container mx-auto flex justify-between items-center">
+<h1 class="text-2xl font-bold">Payroll Management System</h1>
+<nav>
+<ul class="flex space-x-6 text-lg">
+<li><a href="#add-employee" class="hover:underline">Add Employee</a></li>
+<li><a href="#employee-list" class="hover:underline">Employee List</a></li>
+<li><a href="#attendance" class="hover:underline">Attendance</a></li>
+<li><a href="#tax-employee" class="hover:underline">Tax Employee</a></li>
+<li><a href="#payroll" class="hover:underline">Payroll</a></li>
+<li><button id="logoutBtn" class="hover:underline">Logout</button></li>
+</ul>
+</nav>
+</div>
+</header>
+
+<main class="container mx-auto flex-grow p-4">
+<!-- Add Employee Form -->
+<section id="add-employee" class="bg-white rounded shadow p-6 mb-8">
+<h2 class="text-xl font-semibold mb-4 flex items-center">
+<i class="fas fa-user-plus mr-2"></i> Add Employee
+</h2>
+<form id="employeeForm" class="space-y-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div>
+<label for="empName" class="block font-medium mb-1">Full Name</label>
+<input
+type="text"
+id="empName"
+name="empName"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+placeholder="Enter Full Name"
+/>
+</div>
+<div>
+<label for="empEmail" class="block font-medium mb-1">Email</label>
+<input
+type="email"
+id="empEmail"
+name="empEmail"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+placeholder="Enter Email"
+/>
+</div>
+<div>
+<label for="empPosition" class="block font-medium mb-1">Position</label>
+<input
+type="text"
+id="empPosition"
+name="empPosition"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+placeholder="Software Engineer"
+/>
+</div>
+<div>
+<label for="empSalary" class="block font-medium mb-1">Monthly Salary (₱)</label>
+<input
+type="number"
+id="empSalary"
+name="empSalary"
+min="0"
+step="0.01"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+placeholder="5000"
+/>
+</div>
+</div>
+<button
+type="submit"
+class="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800 transition"
+>
+Add Employee
+</button>
+</form>
+</section>
+
+<!-- Employee List -->
+<section id="employee-list" class="bg-white rounded shadow p-6 mb-8 overflow-x-auto">
+<h2 class="text-xl font-semibold mb-4 flex items-center">
+<i class="fas fa-users mr-2"></i> Employee List
+</h2>
+<table class="min-w-full table-auto border-collapse border border-gray-300">
+<thead class="bg-blue-100">
+<tr>
+<th class="border border-gray-300 px-4 py-2 text-left">ID</th>
+<th class="border border-gray-300 px-4 py-2 text-left">Name</th>
+<th class="border border-gray-300 px-4 py-2 text-left">Email</th>
+<th class="border border-gray-300 px-4 py-2 text-left">Position</th>
+<th class="border border-gray-300 px-4 py-2 text-left">Monthly Salary (₱)</th>
+<th class="border border-gray-300 px-4 py-2 text-center">Actions</th>
+</tr>
+</thead>
+<tbody id="employeeTableBody" class="bg-white"></tbody>
+</table>
+</section>
+
+<!-- Attendance Section -->
+<section id="attendance" class="bg-white rounded shadow p-6 mb-8 overflow-x-auto">
+<h2 class="text-xl font-semibold mb-4 flex items-center">
+<i class="fas fa-calendar-check mr-2"></i> Attendance & Overtime
+</h2>
+
+<form id="attendanceForm" class="mb-6 max-w-md space-y-4">
+<div>
+<label for="attendanceEmployee" class="block font-medium mb-1">Select Employee</label>
+<select
+id="attendanceEmployee"
+name="attendanceEmployee"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+>
+<option value="" disabled selected>Select an employee</option>
+</select>
+</div>
+<div>
+<label for="attendanceDate" class="block font-medium mb-1">Date</label>
+<input
+type="date"
+id="attendanceDate"
+name="attendanceDate"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+max=""
+/>
+</div>
+<div>
+<label for="attendanceStatus" class="block font-medium mb-1">Status</label>
+<select
+id="attendanceStatus"
+name="attendanceStatus"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+>
+<option value="in">In</option>
+<option value="out">Out</option>
+<option value="absent">Absent</option>
+</select>
+</div>
+<div>
+<label for="overtimeHours" class="block font-medium mb-1">Overtime Hours</label>
+<input
+type="number"
+id="overtimeHours"
+name="overtimeHours"
+min="0"
+step="0.1"
+value="0"
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+</div>
+<button
+type="submit"
+class="bg-indigo-700 text-white px-6 py-2 rounded hover:bg-indigo-800 transition"
+>
+Add Attendance
+</button>
+</form>
+
+<h3 class="text-lg font-semibold mb-3">Attendance Records</h3>
+<table class="min-w-full table-auto border-collapse border border-gray-300">
+<thead class="bg-indigo-100">
+<tr>
+<th class="border border-gray-300 px-4 py-2 text-left">Date</th>
+<th class="border border-gray-300 px-4 py-2 text-left">Employee</th>
+<th class="border border-gray-300 px-4 py-2 text-left">Status</th>
+<th class="border border-gray-300 px-4 py-2 text-left">Overtime (hrs)</th>
+<th class="border border-gray-300 px-4 py-2 text-center">Actions</th>
+</tr>
+</thead>
+<tbody id="attendanceTableBody" class="bg-white"></tbody>
+</table>
+</section>
+
+<!-- Tax Employee Section -->
+<section id="tax-employee" class="bg-white rounded shadow p-6 mb-8 max-w-3xl">
+<h2 class="text-xl font-semibold mb-4 flex items-center">
+<i class="fas fa-file-invoice mr-2"></i> Tax Employee
+</h2>
+<form id="taxForm" class="space-y-4 max-w-md">
+<div>
+<label for="taxSelectEmployee" class="block font-medium mb-1">Select Employee</label>
+<select
+id="taxSelectEmployee"
+name="taxSelectEmployee"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+>
+<option value="" disabled selected>Select an employee</option>
+</select>
+</div>
+<div>
+<label for="taxYear" class="block font-medium mb-1">Year</label>
+<input
+type="number"
+id="taxYear"
+name="taxYear"
+min="2000"
+max="2100"
+value=""
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+placeholder="2024"
+/>
+</div>
+<button
+type="submit"
+class="bg-purple-700 text-white px-6 py-2 rounded hover:bg-purple-800 transition"
+>
+Calculate Tax
+</button>
+</form>
+
+<div id="taxResult" class="mt-6 p-4 border border-gray-300 rounded bg-gray-50 hidden max-w-lg">
+<h3 class="text-lg font-semibold mb-3">Tax Summary</h3>
+<p><strong>Employee:</strong> <span id="taxEmployeeName"></span></p>
+<p><strong>Position:</strong> <span id="taxEmployeePosition"></span></p>
+<p><strong>Year:</strong> <span id="taxYearDisplay"></span></p>
+<p><strong>Total Annual Salary:</strong> ₱<span id="taxAnnualSalary"></span></p>
+<p><strong>Total Taxable Income:</strong> ₱<span id="taxableIncome"></span></p>
+<p><strong>Tax Amount (20%):</strong> ₱<span id="taxAmount"></span></p>
+<p><strong>Net Income After Tax:</strong> ₱<span id="netIncomeAfterTax"></span></p>
+</div>
+</section>
+
+<!-- Payroll Section -->
+<section id="payroll" class="bg-white rounded shadow p-6 mb-8 max-w-3xl">
+<h2 class="text-xl font-semibold mb-4 flex items-center">
+<i class="fas fa-file-invoice-dollar mr-2"></i> Payroll
+</h2>
+<form id="payrollForm" class="space-y-4 max-w-md">
+<div>
+<label for="selectEmployee" class="block font-medium mb-1">Select Employee</label>
+<select
+id="selectEmployee"
+name="selectEmployee"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+>
+<option value="" disabled selected>Select an employee</option>
+</select>
+</div>
+<div>
+<label for="payMonth" class="block font-medium mb-1">Month</label>
+<input
+type="month"
+id="payMonth"
+name="payMonth"
+required
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+</div>
+<div>
+<label for="bonus" class="block font-medium mb-1">Bonus (₱)</label>
+<input
+type="number"
+id="bonus"
+name="bonus"
+min="0"
+step="0.01"
+value="0"
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+</div>
+<div>
+<label for="deductions" class="block font-medium mb-1">Deductions (₱)</label>
+<input
+type="number"
+id="deductions"
+name="deductions"
+min="0"
+step="0.01"
+value="0"
+class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+</div>
+<button
+type="submit"
+class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+>
+Generate Payslip
+</button>
+</form>
+
+<div id="payslip" class="mt-8 p-6 border border-gray-300 rounded bg-gray-50 hidden max-w-lg" >
+<div id="printable">
+<h3 class="text-lg font-semibold mb-4">Payslip</h3>
+<p><strong>Employee:</strong> <span id="payslipName"></span></p>
+<p><strong>Position:</strong> <span id="payslipPosition"></span></p>
+<p><strong>Month:</strong> <span id="payslipMonth"></span></p>
+<p><strong>Basic Salary:</strong> ₱<span id="payslipSalary"></span></p>
+<p><strong>Bonus:</strong> ₱<span id="payslipBonus"></span></p>
+<p><strong>Deductions:</strong> ₱<span id="payslipDeductions"></span></p>
+<p><strong>Absent Days Deduction:</strong> ₱<span id="payslipAbsentDeduction"></span></p>
+<p><strong>Overtime Pay:</strong> ₱<span id="payslipOvertimePay"></span></p>
+<p><strong>Tax Deduction (10%):</strong> ₱<span id="payslipTaxDeduction"></span></p>
+<hr class="my-3" />
+<p class="text-xl font-bold">
+Net Pay: ₱<span id="payslipNetPay"></span>
+</p>
+</div>
+<button id="printPayslipBtn" class="mt-4 bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-800 transition no-print">
+<i class="fas fa-print mr-2"></i> Print Payslip
+</button>
+</div>
+</section>
+</main>
+
+<footer class="bg-blue-700 text-white p-4 text-center">
+&copy; 2025 Payroll Management System
+</footer>
+</div>
+
+<script>
+
+const loginScreen = document.getElementById("loginScreen");
+const app = document.getElementById("app");
+const loginForm = document.getElementById("loginForm");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const USER = { username: "admin", password: "password" };
+
+function checkLogin() {
+const loggedIn = sessionStorage.getItem("loggedIn");
+if (loggedIn === "true") {
+loginScreen.classList.add("hidden");
+app.classList.remove("hidden");
+} else {
+loginScreen.classList.remove("hidden");
+app.classList.add("hidden");
+}
+}
+
+loginForm.addEventListener("submit", (e) => {
+e.preventDefault();
+const username = document.getElementById("loginUsername").value.trim();
+const password = document.getElementById("loginPassword").value;
+
+if (username === USER.username && password === USER.password) {
+sessionStorage.setItem("loggedIn", "true");
+checkLogin();
+} else {
+alert("Invalid username or password.");
+}
+});
+
+logoutBtn.addEventListener("click", () => {
+sessionStorage.removeItem("loggedIn");
+checkLogin();
+});
+
+checkLogin();
+
+// EMPLOYEE MANAGEMENT
+let employees = JSON.parse(localStorage.getItem("employees")) || [];
+let employeeIdCounter = parseInt(localStorage.getItem("employeeIdCounter")) || 1;
+
+const employeeForm = document.getElementById("employeeForm");
+const employeeTableBody = document.getElementById("employeeTableBody");
+const selectEmployee = document.getElementById("selectEmployee");
+const attendanceEmployee = document.getElementById("attendanceEmployee");
+
+// ATTENDANCE MANAGEMENT
+let attendanceRecords = JSON.parse(localStorage.getItem("attendanceRecords")) || [];
+const attendanceForm = document.getElementById("attendanceForm");
+const attendanceTableBody = document.getElementById("attendanceTableBody");
+
+// PAYROLL
+const payrollForm = document.getElementById("payrollForm");
+const payslip = document.getElementById("payslip");
+const payslipName = document.getElementById("payslipName");
+const payslipPosition = document.getElementById("payslipPosition");
+const payslipMonth = document.getElementById("payslipMonth");
+const payslipSalary = document.getElementById("payslipSalary");
+const payslipBonus = document.getElementById("payslipBonus");
+const payslipDeductions = document.getElementById("payslipDeductions");
+const payslipNetPay = document.getElementById("payslipNetPay");
+const payslipAbsentDeduction = document.getElementById("payslipAbsentDeduction");
+const payslipOvertimePay = document.getElementById("payslipOvertimePay");
+const payslipTaxDeduction = document.getElementById("payslipTaxDeduction");
+const printPayslipBtn = document.getElementById("printPayslipBtn");
+
+// TAX EMPLOYEE
+const taxForm = document.getElementById("taxForm");
+const taxSelectEmployee = document.getElementById("taxSelectEmployee");
+const taxYearInput = document.getElementById("taxYear");
+const taxResult = document.getElementById("taxResult");
+const taxEmployeeName = document.getElementById("taxEmployeeName");
+const taxEmployeePosition = document.getElementById("taxEmployeePosition");
+const taxYearDisplay = document.getElementById("taxYearDisplay");
+const taxAnnualSalary = document.getElementById("taxAnnualSalary");
+const taxableIncome = document.getElementById("taxableIncome");
+const taxAmount = document.getElementById("taxAmount");
+const netIncomeAfterTax = document.getElementById("netIncomeAfterTax");
+
+// Save employees to localStorage
+function saveEmployees() {
+localStorage.setItem("employees", JSON.stringify(employees));
+localStorage.setItem("employeeIdCounter", employeeIdCounter.toString());
+}
+
+// Save attendance to localStorage
+function saveAttendance() {
+localStorage.setItem("attendanceRecords", JSON.stringify(attendanceRecords));
+}
+
+// Render employee list table and dropdowns
+function renderEmployees() {
+employeeTableBody.innerHTML = "";
+selectEmployee.innerHTML = '<option value="" disabled selected>Select an employee</option>';
+attendanceEmployee.innerHTML = '<option value="" disabled selected>Select an employee</option>';
+taxSelectEmployee.innerHTML = '<option value="" disabled selected>Select an employee</option>';
+
+employees.forEach((emp) => {
+const tr = document.createElement("tr");
+tr.classList.add("hover:bg-gray-100");
+
+tr.innerHTML = `
+<td class="border border-gray-300 px-4 py-2">${emp.id}</td>
+<td class="border border-gray-300 px-4 py-2">${emp.name}</td>
+<td class="border border-gray-300 px-4 py-2">${emp.email}</td>
+<td class="border border-gray-300 px-4 py-2">${emp.position}</td>
+<td class="border border-gray-300 px-4 py-2">₱${emp.salary.toFixed(2)}</td>
+<td class="border border-gray-300 px-4 py-2 text-center">
+<button data-id="${emp.id}" class="edit-btn text-yellow-600 hover:text-yellow-800 mr-3" title="Edit">
+<i class="fas fa-edit"></i>
+</button>
+<button data-id="${emp.id}" class="delete-btn text-red-600 hover:text-red-800" title="Delete">
+<i class="fas fa-trash-alt"></i>
+</button>
+</td>
+`;
+employeeTableBody.appendChild(tr);
+
+const option1 = document.createElement("option");
+option1.value = emp.id;
+option1.textContent = emp.name + " (" + emp.position + ")";
+selectEmployee.appendChild(option1);
+
+const option2 = document.createElement("option");
+option2.value = emp.id;
+option2.textContent = emp.name + " (" + emp.position + ")";
+attendanceEmployee.appendChild(option2);
+
+const option3 = document.createElement("option");
+option3.value = emp.id;
+option3.textContent = emp.name + " (" + emp.position + ")";
+taxSelectEmployee.appendChild(option3);
+});
+
+attachEmployeeActionButtons();
+}
+
+// Attach event listeners to edit and delete buttons
+function attachEmployeeActionButtons() {
+const editButtons = document.querySelectorAll(".edit-btn");
+const deleteButtons = document.querySelectorAll(".delete-btn");
+
+editButtons.forEach((btn) => {
+btn.onclick = () => {
+const id = parseInt(btn.getAttribute("data-id"));
+const emp = employees.find((e) => e.id === id);
+if (emp) {
+document.getElementById("empName").value = emp.name;
+document.getElementById("empEmail").value = emp.email;
+document.getElementById("empPosition").value = emp.position;
+document.getElementById("empSalary").value = emp.salary;
+employeeForm.dataset.editId = id;
+employeeForm.querySelector("button[type=submit]").textContent = "Update Employee";
+window.location.hash = "#add-employee";
+}
+};
+});
+
+deleteButtons.forEach((btn) => {
+btn.onclick = () => {
+const id = parseInt(btn.getAttribute("data-id"));
+if (confirm("Are you sure you want to delete this employee? This will also remove their attendance records.")) {
+employees = employees.filter((e) => e.id !== id);
+attendanceRecords = attendanceRecords.filter((a) => a.employeeId !== id);
+saveEmployees();
+saveAttendance();
+renderEmployees();
+renderAttendance();
+}
+};
+});
+}
+
+// Handle add/update employee form submission
+employeeForm.addEventListener("submit", (e) => {
+e.preventDefault();
+
+const name = document.getElementById("empName").value.trim();
+const email = document.getElementById("empEmail").value.trim();
+const position = document.getElementById("empPosition").value.trim();
+const salary = parseFloat(document.getElementById("empSalary").value);
+
+if (!name || !email || !position || isNaN(salary) || salary < 0) {
+alert("Please fill in all fields correctly.");
+return;
+}
+
+if (employeeForm.dataset.editId) {
+// Update existing employee
+const id = parseInt(employeeForm.dataset.editId);
+const empIndex = employees.findIndex((e) => e.id === id);
+if (empIndex !== -1) {
+employees[empIndex] = { id, name, email, position, salary };
+alert("Employee updated successfully.");
+}
+delete employeeForm.dataset.editId;
+employeeForm.querySelector("button[type=submit]").textContent = "Add Employee";
+} else {
+// Add new employee
+employees.push({ id: employeeIdCounter++, name, email, position, salary });
+alert("Employee added successfully.");
+}
+
+saveEmployees();
+renderEmployees();
+employeeForm.reset();
+});
+
+// ATTENDANCE MANAGEMENT
+
+// Set max date for attendance date input to today
+const attendanceDateInput = document.getElementById("attendanceDate");
+attendanceDateInput.max = new Date().toISOString().split("T")[0];
+
+function renderAttendance() {
+attendanceTableBody.innerHTML = "";
+// Sort attendance by date descending
+attendanceRecords.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+attendanceRecords.forEach((record, idx) => {
+const emp = employees.find((e) => e.id === record.employeeId);
+if (!emp) return;
+
+const tr = document.createElement("tr");
+tr.classList.add("hover:bg-gray-100");
+
+let statusText = "";
+let statusColor = "";
+if(record.status === "in") {
+statusText = "In";
+statusColor = "text-green-700 font-semibold";
+} else if(record.status === "out") {
+statusText = "Out";
+statusColor = "text-yellow-700 font-semibold";
+} else if(record.status === "absent") {
+statusText = "Absent";
+statusColor = "text-red-700 font-semibold";
+}
+
+tr.innerHTML = `
+<td class="border border-gray-300 px-4 py-2">${record.date}</td>
+<td class="border border-gray-300 px-4 py-2">${emp.name}</td>
+<td class="border border-gray-300 px-4 py-2 ${statusColor}">${statusText}</td>
+<td class="border border-gray-300 px-4 py-2">${record.overtime.toFixed(1)}</td>
+<td class="border border-gray-300 px-4 py-2 text-center">
+<button data-idx="${idx}" class="delete-attendance-btn text-red-600 hover:text-red-800" title="Delete">
+<i class="fas fa-trash-alt"></i>
+</button>
+</td>
+`;
+attendanceTableBody.appendChild(tr);
+});
+
+attachAttendanceDeleteButtons();
+}
+
+function attachAttendanceDeleteButtons() {
+const deleteButtons = document.querySelectorAll(".delete-attendance-btn");
+deleteButtons.forEach((btn) => {
+btn.onclick = () => {
+const idx = parseInt(btn.getAttribute("data-idx"));
+if (confirm("Are you sure you want to delete this attendance record?")) {
+attendanceRecords.splice(idx, 1);
+saveAttendance();
+renderAttendance();
+}
+};
+});
+}
+
+attendanceForm.addEventListener("submit", (e) => {
+e.preventDefault();
+
+const employeeId = parseInt(attendanceEmployee.value);
+const date = attendanceDateInput.value;
+const status = document.getElementById("attendanceStatus").value;
+const overtime = parseFloat(document.getElementById("overtimeHours").value) || 0;
+
+if (!employeeId || !date || !status) {
+alert("Please fill in all attendance fields.");
+return;
+}
+if (overtime < 0) {
+alert("Overtime hours cannot be negative.");
+return;
+}
+
+// Check if attendance record for this employee and date and status already exists
+const exists = attendanceRecords.some(
+(a) => a.employeeId === employeeId && a.date === date && a.status === status
+);
+if (exists) {
+alert("This attendance record already exists.");
+return;
+}
+
+attendanceRecords.push({ employeeId, date, status, overtime });
+saveAttendance();
+renderAttendance();
+attendanceForm.reset();
+attendanceDateInput.max = new Date().toISOString().split("T")[0];
+});
+
+// PAYROLL GENERATION
+
+// Calculate absent days count for employee in a month
+function countAbsentDays(employeeId, yearMonth) {
+// yearMonth format: "YYYY-MM"
+return attendanceRecords.filter((a) => {
+return (
+a.employeeId === employeeId &&
+a.status === "absent" &&
+a.date.startsWith(yearMonth)
+);
+}).length;
+}
+
+// Calculate total overtime hours for employee in a month
+function sumOvertimeHours(employeeId, yearMonth) {
+return attendanceRecords.reduce((sum, a) => {
+if (a.employeeId === employeeId && a.date.startsWith(yearMonth)) {
+return sum + a.overtime;
+}
+return sum;
+}, 0);
+}
+
+payrollForm.addEventListener("submit", (e) => {
+e.preventDefault();
+
+const empId = parseInt(selectEmployee.value);
+const month = document.getElementById("payMonth").value;
+const bonus = parseFloat(document.getElementById("bonus").value) || 0;
+const manualDeductions = parseFloat(document.getElementById("deductions").value) || 0;
+
+if (!empId || !month) {
+alert("Please select an employee and month.");
+return;
+}
+
+if (bonus < 0 || manualDeductions < 0) {
+alert("Bonus and deductions cannot be negative.");
+return;
+}
+
+const emp = employees.find((e) => e.id === empId);
+if (!emp) {
+alert("Selected employee not found.");
+return;
+}
+
+// Calculate absent days and deduction
+const absentDays = countAbsentDays(empId, month);
+// Deduct 300 per absent day as requested
+const absentDeduction = absentDays * 300;
+
+// Calculate overtime pay
+// Add 500 per hour overtime as requested
+const overtimeHours = sumOvertimeHours(empId, month);
+const overtimePay = overtimeHours * 500;
+
+// Calculate tax deduction (10% of gross salary before manual deductions and tax)
+const grossSalary = emp.salary + bonus + overtimePay - absentDeduction;
+const taxDeduction = grossSalary * 0.10;
+
+// Net pay calculation
+const netPay = grossSalary - manualDeductions - taxDeduction;
+
+payslipName.textContent = emp.name;
+payslipPosition.textContent = emp.position;
+payslipMonth.textContent = new Date(month + "-01").toLocaleString("default", {
+month: "long",
+year: "numeric",
+});
+payslipSalary.textContent = emp.salary.toFixed(2);
+payslipBonus.textContent = bonus.toFixed(2);
+payslipDeductions.textContent = manualDeductions.toFixed(2);
+payslipAbsentDeduction.textContent = absentDeduction.toFixed(2);
+payslipOvertimePay.textContent = overtimePay.toFixed(2);
+payslipTaxDeduction.textContent = taxDeduction.toFixed(2);
+payslipNetPay.textContent = netPay.toFixed(2);
+
+payslip.classList.remove("hidden");
+payslip.scrollIntoView({ behavior: "smooth" });
+});
+
+// PRINT PAYSLIP
+printPayslipBtn.addEventListener("click", () => {
+window.print();
+});
+
+// TAX EMPLOYEE LOGIC
+taxForm.addEventListener("submit", (e) => {
+e.preventDefault();
+
+const empId = parseInt(taxSelectEmployee.value);
+const year = taxYearInput.value.trim();
+
+if (!empId || !year || isNaN(year) || year < 2000 || year > 2100) {
+alert("Please select an employee and enter a valid year.");
+return;
+}
+
+const emp = employees.find((e) => e.id === empId);
+if (!emp) {
+alert("Selected employee not found.");
+return;
+}
+
+// Calculate total annual salary (12 months)
+const annualSalary = emp.salary * 12;
+
+// Calculate total absent days in the year
+const absentDaysInYear = attendanceRecords.filter((a) => {
+return (
+a.employeeId === empId &&
+a.status === "absent" &&
+a.date.startsWith(year)
+);
+}).length;
+
+// Deduct absent days from annual salary (assume 22 working days per month)
+const dailySalary = emp.salary / 22;
+const absentDeduction = dailySalary * absentDaysInYear;
+
+// Taxable income after absent deduction
+const taxable = annualSalary - absentDeduction;
+
+// Tax calculation: flat 20% tax on taxable income
+const tax = taxable * 0.20;
+
+// Net income after tax
+const netIncome = taxable - tax;
+
+taxEmployeeName.textContent = emp.name;
+taxEmployeePosition.textContent = emp.position;
+taxYearDisplay.textContent = year;
+taxAnnualSalary.textContent = annualSalary.toFixed(2);
+taxableIncome.textContent = taxable.toFixed(2);
+taxAmount.textContent = tax.toFixed(2);
+netIncomeAfterTax.textContent = netIncome.toFixed(2);
+
+taxResult.classList.remove("hidden");
+taxResult.scrollIntoView({ behavior: "smooth" });
+});
+
+renderEmployees();
+renderAttendance();
+
+taxYearInput.value = new Date().getFullYear();
+</script>
+</body>
+</html>
